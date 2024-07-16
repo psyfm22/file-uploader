@@ -69,14 +69,14 @@ function App() {
         {" "}
         Upload Image
       </button>
-      {images.map((url, index) => {
+      {/* images.map((url, index) => {
         return (
           <div key={index}>
             <br />
             <img src={url} />
           </div>
         );
-      })}
+      }) Don't Need To Represent Images */}
     </div>
   );
 }
