@@ -8,6 +8,7 @@ import {
   getDownloadURL,
   list,
 } from "firebase/storage";
+import { nanoid } from "nanoid";
 import Swal from "sweetalert2";
 
 //Need to add some sort of authentication to this as now anyone can change
@@ -55,9 +56,11 @@ function App() {
     }
 
     const fileExtension = fileType === "image/png" ? ".png" : ".jpg"; //Get The extension
+    const randomString = nanoid(8);
+    console.log(nanoid);
     const imageReference = ref(
       storage,
-      "images/image" + fileCount + fileExtension
+      "images/image" + fileCount + randomString + fileExtension
     ); //Create the reference, include the number or name
 
     uploadBytes(imageReference, file).then((snapshot) => {
