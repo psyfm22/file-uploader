@@ -38,3 +38,9 @@ button:hover {
 .custom-file-upload input[type="file"] {
   display: none;
 }
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  color: #999;
+}

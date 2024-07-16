@@ -8,12 +8,13 @@ import {
   getDownloadURL,
   list,
 } from "firebase/storage";
+import Swal from "sweetalert2";
 
 //Need to add some sort of authentication to this as now anyone can change
 
 function App() {
   const [file, setFile] = useState(null); //Stores the image files
-  const [images, setImages] = useState([]); //Stores a list of Images, Probably wont need this
+  //const [images, setImages] = useState([]); //Stores a list of Images, Probably wont need this
   const [fileCount, setFileCount] = useState(0); //Stores the number of Images
   const [uploading, setUploading] = useState(false);
 
@@ -30,7 +31,11 @@ function App() {
     setUploading(true);
 
     if (file == null) {
-      alert("No Image File Selected"); //They need to select a file to upload
+      Swal.fire({
+        icon: "error",
+        title: "No image selected!",
+        showConfirmButton: true,
+      }); //No file selected
       setUploading(false);
       return;
     }
@@ -39,7 +44,12 @@ function App() {
 
     if (!["image/png", "image/jpeg"].includes(fileType)) {
       //File must be an image of one of these types
-      alert("Only image PNG or JPG Files are allowed!");
+      Swal.fire({
+        icon: "error",
+        title: "Only PNG and JPG image files are allowed!",
+        showConfirmButton: true,
+      }); //Incorrect File type selected
+      setFile(null);
       setUploading(false);
       return;
     }
@@ -55,7 +65,12 @@ function App() {
         setFileCount((prevCount) => prevCount + 1);
       });
     });
-    alert("Image has been Uploaded!");
+    //Fire an alert
+    Swal.fire({
+      icon: "success",
+      title: "Your Image has been Uploaded!",
+      showConfirmButton: true,
+    });
     setFile(null);
     setUploading(false);
   }
