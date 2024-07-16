@@ -81,18 +81,20 @@ function App() {
 
   return (
     <div className="App">
-      <h1>File Uploader</h1>
-      <label className="custom-file-upload">
-        <input type="file" onChange={handleFileChange} />
-        Upload Image
-      </label>
-      {file ? `Selected File: ${file.name}` : "Choose File"}
-      <br />
-      <br />
-      <button onClick={handleUpload} disabled={uploading}>
-        {" "}
-        Upload Image
-      </button>
+      <div className="container">
+        <h1>File Uploader</h1>
+        <label className="custom-file-upload">
+          <input type="file" onChange={handleFileChange} />
+          Choose File{" "}
+        </label>
+        {file ? `Selected File: ${file.name}` : "No File Selected"}
+        <br />
+        <br />
+        <button onClick={handleUpload} disabled={uploading}>
+          {" "}
+          Upload Image
+        </button>
+      </div>
       {/* images.map((url, index) => {
         return (
           <div key={index}>
