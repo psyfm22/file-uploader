@@ -16,44 +16,41 @@ function App() {
   const [fileCount, setFileCount] = useState(0); //Stores the number of Images
   const [uploading, setUploading] = useState(false);
 
-  const imagesListRef = ref(storage, "images/");
+  const imagesListRef = ref(storage, "images/"); //The file on firebase starts in the images folder
 
   useEffect(() => {
     listAll(imagesListRef).then((response) => {
-      response.items.forEach((item) => {
-        getDownloadURL(item).then((url) => {
-          setImages((prev) => [...prev, url]);
-          const itemCount = response.items.length;
-          setFileCount(itemCount);
-          console.log(itemCount);
-        });
-      });
+      setFileCount(response.items.length); //Get the initial number of files
+      console.log(response.items.length);
     });
   }, []);
 
   function handleUpload() {
     setUploading(true);
+
     if (file == null) {
-      alert("No Image File Selected");
+      alert("No Image File Selected"); //They need to select a file to upload
       setUploading(false);
       return;
     }
-    const fileType = file.type;
+
+    const fileType = file.type; //Get the type of the file
+
     if (!["image/png", "image/jpeg"].includes(fileType)) {
+      //File must be an image of one of these types
       alert("Only image PNG or JPG Files are allowed!");
       setUploading(false);
       return;
     }
 
-    const fileExtension = fileType === "image/png" ? ".png" : ".jpg";
+    const fileExtension = fileType === "image/png" ? ".png" : ".jpg"; //Get The extension
     const imageReference = ref(
       storage,
       "images/image" + fileCount + fileExtension
-    );
+    ); //Create the reference, include the number or name
 
     uploadBytes(imageReference, file).then((snapshot) => {
       getDownloadURL(snapshot.ref).then((url) => {
-        setImages((prev) => [...prev, url]);
         setFileCount((prevCount) => prevCount + 1);
       });
     });
