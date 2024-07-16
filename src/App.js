@@ -45,7 +45,11 @@ function App() {
       return;
     }
 
-    const imageReference = ref(storage, "images/image" + fileCount);
+    const fileExtension = fileType === "image/png" ? ".png" : ".jpg";
+    const imageReference = ref(
+      storage,
+      "images/image" + fileCount + fileExtension
+    );
 
     uploadBytes(imageReference, file).then((snapshot) => {
       getDownloadURL(snapshot.ref).then((url) => {
@@ -76,7 +80,7 @@ function App() {
             <img src={url} />
           </div>
         );
-      }) Don't Need To Represent Images */}
+      }) Don't Need To Represent Images  */}
     </div>
   );
 }
