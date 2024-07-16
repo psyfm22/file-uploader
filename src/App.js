@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import "./App.css";
 import { storage } from "./firebase";
 import {
   ref,
@@ -55,6 +56,7 @@ function App() {
       });
     });
     alert("Image has been Uploaded!");
+    setFile(null);
     setUploading(false);
   }
 
@@ -64,7 +66,13 @@ function App() {
 
   return (
     <div className="App">
-      <input type="file" onChange={handleFileChange} />
+      <h1>File Uploader</h1>
+      <label className="custom-file-upload">
+        <input type="file" onChange={handleFileChange} />
+        Upload Image
+      </label>
+      {file ? `Selected File: ${file.name}` : "Choose File"}
+      <br />
       <br />
       <button onClick={handleUpload} disabled={uploading}>
         {" "}
