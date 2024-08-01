@@ -8,6 +8,7 @@ import {
   getDownloadURL,
   list,
 } from "firebase/storage";
+import heic2any from "heic2any";
 import { nanoid } from "nanoid";
 import Swal from "sweetalert2";
 import Resizer from "react-image-file-resizer";
@@ -29,6 +30,23 @@ function App() {
       console.log(response.items.length);
     });
   }, []);
+
+  const resizeFile = (file) => {
+    return new Promise((resolve) => {
+      Resizer.imageFileResizer(
+        file,
+        1920, // maxWidth
+        1920, // maxHeight
+        "JPEG",
+        90, // quality
+        0,
+        (uri) => {
+          resolve(uri);
+        },
+        "blob" // outputType
+      );
+    });
+  };
 
   async function handleUpload() {
     setUploading(true);
@@ -57,9 +75,22 @@ function App() {
       setUploading(false);
       return;
     }
+    let fileToProcess = file;
+    let holderFile = file;
 
     try {
-      const resizedFile = await resizeFile(file);
+      if (fileExtension === "heic") {
+        console.log("hello");
+        const heicFile = await heic2any({
+          blob: holderFile,
+          toType: "image/png",
+        });
+        fileToProcess = heicFile;
+      }
+
+      const resizedFile = await resizeFile(fileToProcess);
+
+      console.log("Flag2");
       const randomString = nanoid(8);
       console.log(nanoid);
       const imageReference = ref(
@@ -71,11 +102,14 @@ function App() {
         "images/image" + fileCount + randomString + "." + fileExtension
       );
 
+      console.log("Flag3");
       await uploadBytes(imageReference, resizedFile).then((snapshot) => {
         getDownloadURL(snapshot.ref).then((url) => {
           setFileCount((prevCount) => prevCount + 1);
         });
       });
+
+      console.log("Flag4");
       //Fire an alert
       Swal.fire({
         icon: "success",
@@ -95,23 +129,6 @@ function App() {
 
   function handleFileChange(event) {
     setFile(event.target.files[0]);
-  }
-
-  async function resizeFile(file) {
-    new Promise((resolve) => {
-      Resizer.imageFileResizer(
-        file,
-        1920, // maxWidth
-        1080, // maxHeight
-        "JPEG", // compressFormat
-        100,
-        0,
-        (uri) => {
-          resolve(uri);
-        },
-        "blob" //best for uploading to firebase api
-      );
-    });
   }
 
   return (
