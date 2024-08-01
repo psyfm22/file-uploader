@@ -44,11 +44,11 @@ function App() {
 
     console.log(fileExtension);
 
-    if (!["png", "jpeg", "heic"].includes(fileExtension)) {
+    if (!["png", "jpeg", "heic", "webp"].includes(fileExtension)) {
       // File must be an image of one of these types
       Swal.fire({
         icon: "error",
-        title: "Only PNG, JPG, and HEIC image files are allowed!",
+        title: "Only PNG, JPG, WEBP and HEIC image files are allowed!",
         showConfirmButton: true,
       }); // Incorrect File type selected
       setFile(null);
