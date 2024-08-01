@@ -40,29 +40,32 @@ function App() {
       setUploading(false);
       return;
     }
+    const fileExtension = file.name.split(".").pop().toLowerCase();
 
-    const fileType = file.type; //Get the type of the file
+    console.log(fileExtension);
 
-    if (!["image/png", "image/jpeg", "image/heic"].includes(fileType)) {
-      //File must be an image of one of these types
+    if (!["png", "jpeg", "heic"].includes(fileExtension)) {
+      // File must be an image of one of these types
       Swal.fire({
         icon: "error",
-        title: "Only PNG, JPG and HEIC image files are allowed!",
+        title: "Only PNG, JPG, and HEIC image files are allowed!",
         showConfirmButton: true,
-      }); //Incorrect File type selected
+      }); // Incorrect File type selected
       setFile(null);
       setUploading(false);
       return;
     }
 
-    const fileExtension =
-      fileType === "image/png" ? fileType === "image/jpg" : "image/heic"; //Get The extension
     const randomString = nanoid(8);
     console.log(nanoid);
     const imageReference = ref(
       storage,
-      "images/image" + fileCount + randomString + fileExtension
+      "images/image" + fileCount + randomString + "." + fileExtension
     ); //Create the reference, include the number or name
+
+    console.log(
+      "images/image" + fileCount + randomString + "." + fileExtension
+    );
 
     uploadBytes(imageReference, file).then((snapshot) => {
       getDownloadURL(snapshot.ref).then((url) => {
