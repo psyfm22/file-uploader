@@ -10,8 +10,10 @@ import {
 } from "firebase/storage";
 import { nanoid } from "nanoid";
 import Swal from "sweetalert2";
+import Resizer from "react-image-file-resizer";
 
 //Need to add some sort of authentication to this as now anyone can change
+//Need to add a way to reduce resolution
 
 function App() {
   const [file, setFile] = useState(null); //Stores the image files
@@ -28,7 +30,7 @@ function App() {
     });
   }, []);
 
-  function handleUpload() {
+  async function handleUpload() {
     setUploading(true);
 
     if (file == null) {
@@ -56,34 +58,60 @@ function App() {
       return;
     }
 
-    const randomString = nanoid(8);
-    console.log(nanoid);
-    const imageReference = ref(
-      storage,
-      "images/image" + fileCount + randomString + "." + fileExtension
-    ); //Create the reference, include the number or name
+    try {
+      const resizedFile = await resizeFile(file);
+      const randomString = nanoid(8);
+      console.log(nanoid);
+      const imageReference = ref(
+        storage,
+        "images/image" + fileCount + randomString + "." + fileExtension
+      ); //Create the reference, include the number or name
 
-    console.log(
-      "images/image" + fileCount + randomString + "." + fileExtension
-    );
+      console.log(
+        "images/image" + fileCount + randomString + "." + fileExtension
+      );
 
-    uploadBytes(imageReference, file).then((snapshot) => {
-      getDownloadURL(snapshot.ref).then((url) => {
-        setFileCount((prevCount) => prevCount + 1);
+      await uploadBytes(imageReference, resizedFile).then((snapshot) => {
+        getDownloadURL(snapshot.ref).then((url) => {
+          setFileCount((prevCount) => prevCount + 1);
+        });
       });
-    });
-    //Fire an alert
-    Swal.fire({
-      icon: "success",
-      title: "Your Image has been Uploaded!",
-      showConfirmButton: true,
-    });
-    setFile(null);
-    setUploading(false);
+      //Fire an alert
+      Swal.fire({
+        icon: "success",
+        title: "Your Image has been Uploaded!",
+        showConfirmButton: true,
+      });
+      setFile(null);
+      setUploading(false);
+    } catch (err) {
+      Swal.fire({
+        icon: "error",
+        title: "Failed to upload image!",
+        showConfirmButton: true,
+      });
+    }
   }
 
   function handleFileChange(event) {
     setFile(event.target.files[0]);
+  }
+
+  async function resizeFile(file) {
+    new Promise((resolve) => {
+      Resizer.imageFileResizer(
+        file,
+        1920, // maxWidth
+        1080, // maxHeight
+        "JPEG", // compressFormat
+        100,
+        0,
+        (uri) => {
+          resolve(uri);
+        },
+        "blob" //best for uploading to firebase api
+      );
+    });
   }
 
   return (
