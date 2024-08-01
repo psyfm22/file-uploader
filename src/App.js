@@ -43,11 +43,11 @@ function App() {
 
     const fileType = file.type; //Get the type of the file
 
-    if (!["image/png", "image/jpeg"].includes(fileType)) {
+    if (!["image/png", "image/jpeg", "image/heic"].includes(fileType)) {
       //File must be an image of one of these types
       Swal.fire({
         icon: "error",
-        title: "Only PNG and JPG image files are allowed!",
+        title: "Only PNG, JPG and HEIC image files are allowed!",
         showConfirmButton: true,
       }); //Incorrect File type selected
       setFile(null);
@@ -55,7 +55,8 @@ function App() {
       return;
     }
 
-    const fileExtension = fileType === "image/png" ? ".png" : ".jpg"; //Get The extension
+    const fileExtension =
+      fileType === "image/png" ? fileType === "image/jpg" : "image/heic"; //Get The extension
     const randomString = nanoid(8);
     console.log(nanoid);
     const imageReference = ref(
