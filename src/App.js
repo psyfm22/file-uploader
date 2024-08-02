@@ -113,6 +113,7 @@ function App() {
     try {
       if (fileExtension === "heic") {
         console.log("flag1");
+        //Its the converting from heic file which takes a while
         const heicFile = await heic2any({
           blob: holderFile,
           toType: "image/png",
