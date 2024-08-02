@@ -12,9 +12,8 @@ import heic2any from "heic2any";
 import { nanoid } from "nanoid";
 import Swal from "sweetalert2";
 import Resizer from "react-image-file-resizer";
-import Pica from "pica";
-
-const pica = new Pica();
+// import Pica from "pica";
+// const pica = new Pica();
 
 //Need to add some sort of authentication to this as now anyone can change
 //Need to add a way to reduce resolution
@@ -34,42 +33,42 @@ function App() {
     });
   }, []);
 
-  function resizeImage(image, maxWidth, maxHeight) {
-    return new Promise((resolve, reject) => {
-      const canvas = document.createElement("canvas");
+  // function resizeImage(image, maxWidth, maxHeight) {
+  //   return new Promise((resolve, reject) => {
+  //     const canvas = document.createElement("canvas");
 
-      const img = new Image();
-      img.src = URL.createObjectURL(image);
+  //     const img = new Image();
+  //     img.src = URL.createObjectURL(image);
 
-      img.onload = () => {
-        const aspectRatio = img.width / img.height;
-        if (img.width > img.height) {
-          canvas.width = maxWidth;
-          canvas.height = maxWidth / aspectRatio;
-        } else {
-          canvas.height = maxHeight;
-          canvas.width = maxHeight * aspectRatio;
-        }
+  //     img.onload = () => {
+  //       const aspectRatio = img.width / img.height;
+  //       if (img.width > img.height) {
+  //         canvas.width = maxWidth;
+  //         canvas.height = maxWidth / aspectRatio;
+  //       } else {
+  //         canvas.height = maxHeight;
+  //         canvas.width = maxHeight * aspectRatio;
+  //       }
 
-        pica
-          .resize(img, canvas)
-          .then((result) => pica.toBlob(result, "image/png", 0.9))
-          .then((blob) => resolve(blob))
-          .catch((error) => reject(error));
-      };
+  //       pica
+  //         .resize(img, canvas)
+  //         .then((result) => pica.toBlob(result, "image/png", 0.9))
+  //         .then((blob) => resolve(blob))
+  //         .catch((error) => reject(error));
+  //     };
 
-      img.onerror = (error) => reject(error);
-    });
-  }
+  //     img.onerror = (error) => reject(error);
+  //   });
+  // }
 
   const resizeFile = (file) => {
     return new Promise((resolve) => {
       Resizer.imageFileResizer(
         file,
-        1920, // maxWidth
-        1920, // maxHeight
+        504, // maxWidth
+        504, // maxHeight
         "PNG",
-        90, // quality
+        60, // quality
         0,
         (uri) => {
           resolve(uri);
