@@ -12,6 +12,9 @@ import heic2any from "heic2any";
 import { nanoid } from "nanoid";
 import Swal from "sweetalert2";
 import Resizer from "react-image-file-resizer";
+import Pica from "pica";
+
+const pica = new Pica();
 
 //Need to add some sort of authentication to this as now anyone can change
 //Need to add a way to reduce resolution
@@ -31,13 +34,41 @@ function App() {
     });
   }, []);
 
+  function resizeImage(image, maxWidth, maxHeight) {
+    return new Promise((resolve, reject) => {
+      const canvas = document.createElement("canvas");
+
+      const img = new Image();
+      img.src = URL.createObjectURL(image);
+
+      img.onload = () => {
+        const aspectRatio = img.width / img.height;
+        if (img.width > img.height) {
+          canvas.width = maxWidth;
+          canvas.height = maxWidth / aspectRatio;
+        } else {
+          canvas.height = maxHeight;
+          canvas.width = maxHeight * aspectRatio;
+        }
+
+        pica
+          .resize(img, canvas)
+          .then((result) => pica.toBlob(result, "image/png", 0.9))
+          .then((blob) => resolve(blob))
+          .catch((error) => reject(error));
+      };
+
+      img.onerror = (error) => reject(error);
+    });
+  }
+
   const resizeFile = (file) => {
     return new Promise((resolve) => {
       Resizer.imageFileResizer(
         file,
         1920, // maxWidth
         1920, // maxHeight
-        "JPEG",
+        "PNG",
         90, // quality
         0,
         (uri) => {
@@ -60,7 +91,7 @@ function App() {
       setUploading(false);
       return;
     }
-    const fileExtension = file.name.split(".").pop().toLowerCase();
+    let fileExtension = file.name.split(".").pop().toLowerCase();
 
     console.log(fileExtension);
 
@@ -77,18 +108,22 @@ function App() {
     }
     let fileToProcess = file;
     let holderFile = file;
+    let resizedFile = file;
 
     try {
       if (fileExtension === "heic") {
-        console.log("hello");
+        console.log("flag1");
         const heicFile = await heic2any({
           blob: holderFile,
           toType: "image/png",
         });
         fileToProcess = heicFile;
-      }
+        fileExtension = "png";
+        console.log("before file process");
 
-      const resizedFile = await resizeFile(fileToProcess);
+        // resizedFile = await resizeImage(fileToProcess,1920,1920);
+        resizedFile = await resizeFile(fileToProcess);
+      }
 
       console.log("Flag2");
       const randomString = nanoid(8);
