@@ -1,79 +1,57 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
-import { storage } from "./firebase";
-import {
-  ref,
-  uploadBytes,
-  listAll,
-  getDownloadURL,
-  list,
-} from "firebase/storage";
+import { storage, authentication, signInAnonymously } from "./firebase";
+import { ref, uploadBytes, listAll, getDownloadURL } from "firebase/storage";
 import heic2any from "heic2any";
 import { nanoid } from "nanoid";
 import Swal from "sweetalert2";
 import Resizer from "react-image-file-resizer";
-// import Pica from "pica";
-// const pica = new Pica();
-
-//Need to add some sort of authentication to this as now anyone can change
-//Need to add a way to reduce resolution
 
 function App() {
-  const [file, setFile] = useState(null); //Stores the image files
-  //const [images, setImages] = useState([]); //Stores a list of Images, Probably wont need this
-  const [fileCount, setFileCount] = useState(0); //Stores the number of Images
+  const [file, setFile] = useState(null); // Stores the image files
+  const [fileCount, setFileCount] = useState(0); // Stores the number of Images
   const [uploading, setUploading] = useState(false);
 
-  const imagesListRef = ref(storage, "images/"); //The file on firebase starts in the images folder
+  const imagesListRef = ref(storage, "images/"); // The file on firebase starts in the images folder
+
+  const signInAnonymouslyHandler = async () => {
+    try {
+      await signInAnonymously(authentication);
+    } catch (error) {
+      console.error("Error signing in anonymously:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Failed to authenticate!",
+        showConfirmButton: true,
+      });
+    }
+  };
 
   useEffect(() => {
-    listAll(imagesListRef).then((response) => {
-      setFileCount(response.items.length); //Get the initial number of files
-      console.log(response.items.length);
-    });
-  }, []);
-
-  // function resizeImage(image, maxWidth, maxHeight) {
-  //   return new Promise((resolve, reject) => {
-  //     const canvas = document.createElement("canvas");
-
-  //     const img = new Image();
-  //     img.src = URL.createObjectURL(image);
-
-  //     img.onload = () => {
-  //       const aspectRatio = img.width / img.height;
-  //       if (img.width > img.height) {
-  //         canvas.width = maxWidth;
-  //         canvas.height = maxWidth / aspectRatio;
-  //       } else {
-  //         canvas.height = maxHeight;
-  //         canvas.width = maxHeight * aspectRatio;
-  //       }
-
-  //       pica
-  //         .resize(img, canvas)
-  //         .then((result) => pica.toBlob(result, "image/png", 0.9))
-  //         .then((blob) => resolve(blob))
-  //         .catch((error) => reject(error));
-  //     };
-
-  //     img.onerror = (error) => reject(error);
-  //   });
-  // }
+    const authenticateAndFetchImages = async () => {
+      if (!authentication.currentUser) {
+        await signInAnonymouslyHandler();
+      }
+      // listAll(imagesListRef).then((response) => {
+      //   setFileCount(response.items.length); // Get the initial number of files
+      // });
+    };
+    authenticateAndFetchImages();
+  }, [authentication.currentUser, imagesListRef]);
 
   const resizeFile = (file) => {
     return new Promise((resolve) => {
       Resizer.imageFileResizer(
         file,
-        504, // maxWidth
-        504, // maxHeight
+        504,
+        504,
         "PNG",
-        60, // quality
+        60,
         0,
         (uri) => {
           resolve(uri);
         },
-        "blob" // outputType
+        "blob"
       );
     });
   };
@@ -81,18 +59,21 @@ function App() {
   async function handleUpload() {
     setUploading(true);
 
+    if (!authentication.currentUser) {
+      await signInAnonymouslyHandler();
+    }
+
     if (file == null) {
       Swal.fire({
         icon: "error",
         title: "No image selected!",
         showConfirmButton: true,
-      }); //No file selected
+      }); // No file selected
       setUploading(false);
       return;
     }
-    let fileExtension = file.name.split(".").pop().toLowerCase();
 
-    console.log(fileExtension);
+    let fileExtension = file.name.split(".").pop().toLowerCase();
 
     if (!["png", "jpeg", "heic", "webp", "heif"].includes(fileExtension)) {
       // File must be an image of one of these types
@@ -105,47 +86,36 @@ function App() {
       setUploading(false);
       return;
     }
+
     let fileToProcess = file;
-    let holderFile = file;
     let resizedFile = file;
 
     try {
       if (fileExtension === "heic") {
-        console.log("flag1");
-        //Its the converting from heic file which takes a while
+        // It's the converting from HEIC file which takes a while
         const heicFile = await heic2any({
-          blob: holderFile,
+          blob: fileToProcess,
           toType: "image/png",
         });
         fileToProcess = heicFile;
         fileExtension = "png";
-        console.log("before file process");
 
-        // resizedFile = await resizeImage(fileToProcess,1920,1920);
         resizedFile = await resizeFile(fileToProcess);
       }
 
-      console.log("Flag2");
       const randomString = nanoid(8);
-      console.log(nanoid);
       const imageReference = ref(
         storage,
         "images/image" + fileCount + randomString + "." + fileExtension
-      ); //Create the reference, include the number or name
+      ); // Create the reference, include the number or name
 
-      console.log(
-        "images/image" + fileCount + randomString + "." + fileExtension
-      );
-
-      console.log("Flag3");
       await uploadBytes(imageReference, resizedFile).then((snapshot) => {
         getDownloadURL(snapshot.ref).then((url) => {
           setFileCount((prevCount) => prevCount + 1);
         });
       });
 
-      console.log("Flag4");
-      //Fire an alert
+      // Fire an alert
       Swal.fire({
         icon: "success",
         title: "Your Image has been Uploaded!",
@@ -178,7 +148,6 @@ function App() {
         <br />
         <br />
         <button onClick={handleUpload} disabled={uploading}>
-          {" "}
           Upload Image
         </button>
       </div>
@@ -188,8 +157,7 @@ function App() {
             <br />
             <img src={url} />
           </div>
-        );
-      }) Don't Need To Represent Images  */}
+      }) Don't Need To Represent Images */}
     </div>
   );
 }
