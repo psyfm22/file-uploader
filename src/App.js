@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
-import { storage, authentication, signInAnonymously } from "./firebase";
+import {
+  storage,
+  authentication,
+  signInAnonymously,
+  appCheck,
+} from "./firebase";
+import { getToken } from "firebase/app-check";
 import { ref, uploadBytes, listAll, getDownloadURL } from "firebase/storage";
 import heic2any from "heic2any";
 import { nanoid } from "nanoid";
@@ -72,6 +78,9 @@ function App() {
       setUploading(false);
       return;
     }
+    const token = await getToken(appCheck);
+
+    console.log(token);
 
     let fileExtension = file.name.split(".").pop().toLowerCase();
 
