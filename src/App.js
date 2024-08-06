@@ -4,7 +4,7 @@ import {
   storage,
   authentication,
   signInAnonymously,
-  // appCheck,
+  appCheck,
 } from "./firebase";
 import { getToken } from "firebase/app-check";
 import { ref, uploadBytes, listAll, getDownloadURL } from "firebase/storage";
