@@ -4,7 +4,7 @@ import {
   storage,
   authentication,
   signInAnonymously,
-  appCheck,
+  // appCheck,
 } from "./firebase";
 import { getToken } from "firebase/app-check";
 import { ref, uploadBytes, listAll, getDownloadURL } from "firebase/storage";
@@ -78,9 +78,8 @@ function App() {
       setUploading(false);
       return;
     }
-    const token = await getToken(appCheck);
-
-    console.log(token);
+    // const token = await getToken(appCheck);
+    // console.log(token);
 
     let fileExtension = file.name.split(".").pop().toLowerCase();
 
