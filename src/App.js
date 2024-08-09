@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
+import Lottie from "lottie-react";
 import {
   storage,
   authentication,
@@ -12,6 +13,7 @@ import heic2any from "heic2any";
 import { nanoid } from "nanoid";
 import Swal from "sweetalert2";
 import Resizer from "react-image-file-resizer";
+import uploadingAnimation from "./animation/uploadingAnimation.json";
 
 function App() {
   const [file, setFile] = useState(null); // Stores the image files
@@ -158,7 +160,14 @@ function App() {
         <button onClick={handleUpload} disabled={uploading}>
           Upload Image
         </button>
+        {uploading && (
+          <Lottie
+            animationData={uploadingAnimation}
+            style={{ width: 125, height: 125 }}
+          ></Lottie>
+        )}
       </div>
+
       {/* images.map((url, index) => {
         return (
           <div key={index}>
