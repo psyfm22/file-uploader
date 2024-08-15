@@ -85,7 +85,9 @@ function App() {
 
     let fileExtension = file.name.split(".").pop().toLowerCase();
 
-    if (!["png", "jpeg", "heic", "webp", "heif"].includes(fileExtension)) {
+    if (
+      !["png", "jpeg", "jpg", "heic", "webp", "heif"].includes(fileExtension)
+    ) {
       // File must be an image of one of these types
       Swal.fire({
         icon: "error",
@@ -167,14 +169,6 @@ function App() {
           ></Lottie>
         )}
       </div>
-
-      {/* images.map((url, index) => {
-        return (
-          <div key={index}>
-            <br />
-            <img src={url} />
-          </div>
-      }) Don't Need To Represent Images */}
     </div>
   );
 }
