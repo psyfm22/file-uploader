@@ -7,7 +7,6 @@ import {
   signInAnonymously,
   appCheck,
 } from "./firebase";
-import { getToken } from "firebase/app-check";
 import { ref, uploadBytes, listAll, getDownloadURL } from "firebase/storage";
 import heic2any from "heic2any";
 import { nanoid } from "nanoid";
@@ -40,9 +39,6 @@ function App() {
       if (!authentication.currentUser) {
         await signInAnonymouslyHandler();
       }
-      // listAll(imagesListRef).then((response) => {
-      //   setFileCount(response.items.length); // Get the initial number of files
-      // });
     };
     authenticateAndFetchImages();
   }, [authentication.currentUser, imagesListRef]);
