@@ -15,6 +15,7 @@ import Resizer from "react-image-file-resizer";
 import uploadingAnimation from "./animation/uploadingAnimation.json";
 
 function App() {
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
   const [file, setFile] = useState(null); // Stores the image files
   const [fileCount, setFileCount] = useState(0); // Stores the number of Images
   const [uploading, setUploading] = useState(false);
@@ -88,6 +89,18 @@ function App() {
       Swal.fire({
         icon: "error",
         title: "Only PNG, JPG, WEBP, HEIF and HEIC image files are allowed!",
+        showConfirmButton: true,
+      }); // Incorrect File type selected
+      setFile(null);
+      setUploading(false);
+      return;
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
+      // File must be below max file size
+      Swal.fire({
+        icon: "error",
+        title: "File Size Must be below 10 MB",
         showConfirmButton: true,
       }); // Incorrect File type selected
       setFile(null);
