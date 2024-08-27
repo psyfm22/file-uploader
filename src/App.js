@@ -22,6 +22,7 @@ function App() {
 
   const imagesListRef = ref(storage, "images/"); // The file on firebase starts in the images folder
 
+  //Signs the user annonymously into the firebase
   const signInAnonymouslyHandler = async () => {
     try {
       await signInAnonymously(authentication);
@@ -36,6 +37,7 @@ function App() {
   };
 
   useEffect(() => {
+    // sign in the user first to the user
     const authenticateAndFetchImages = async () => {
       if (!authentication.currentUser) {
         await signInAnonymouslyHandler();
@@ -44,6 +46,7 @@ function App() {
     authenticateAndFetchImages();
   }, [authentication.currentUser, imagesListRef]);
 
+  //resize the image using Resizer to these set proportions
   const resizeFile = (file) => {
     return new Promise((resolve) => {
       Resizer.imageFileResizer(
@@ -61,13 +64,17 @@ function App() {
     });
   };
 
+  //Handle the upload of the image to the firebase
   async function handleUpload() {
+    //Uploading image
     setUploading(true);
 
+    //If not authenticated sign in again
     if (!authentication.currentUser) {
       await signInAnonymouslyHandler();
     }
 
+    //No Image selected, through error
     if (file == null) {
       Swal.fire({
         icon: "error",
@@ -77,27 +84,30 @@ function App() {
       setUploading(false);
       return;
     }
+
     // const token = await getToken(appCheck);
     // console.log(token);
 
+    //Get the extension of the file
     let fileExtension = file.name.split(".").pop().toLowerCase();
 
+    //If extension is not one of the below file types then it is not an image
+    // so throw an error
     if (
       !["png", "jpeg", "jpg", "heic", "webp", "heif"].includes(fileExtension)
     ) {
-      // File must be an image of one of these types
       Swal.fire({
         icon: "error",
         title: "Only PNG, JPG, WEBP, HEIF and HEIC image files are allowed!",
         showConfirmButton: true,
-      }); // Incorrect File type selected
+      });
       setFile(null);
       setUploading(false);
       return;
     }
 
+    //If file size is above the max file size then throw an error
     if (file.size > MAX_FILE_SIZE) {
-      // File must be below max file size
       Swal.fire({
         icon: "error",
         title: "File Size Must be below 10 MB",
@@ -108,29 +118,29 @@ function App() {
       return;
     }
 
-    let fileToProcess = file;
-    let resizedFile = file;
+    let fileToProcess;
 
     try {
       if (fileExtension === "heic") {
         // It's the converting from HEIC file which takes a while
         const heicFile = await heic2any({
-          blob: fileToProcess,
+          blob: file,
           toType: "image/png",
         });
         fileToProcess = heicFile;
         fileExtension = "png";
 
-        resizedFile = await resizeFile(fileToProcess);
+        fileToProcess = await resizeFile(fileToProcess);
       }
 
       const randomString = nanoid(8);
       const imageReference = ref(
         storage,
-        "images/image" + fileCount + randomString + "." + fileExtension
+        "images/image" + fileCount + randomString + "." + fileToProcess
       ); // Create the reference, include the number or name
 
-      await uploadBytes(imageReference, resizedFile).then((snapshot) => {
+      //Uploading the image and setting the file count to add one
+      await uploadBytes(imageReference, fileToProcess).then((snapshot) => {
         getDownloadURL(snapshot.ref).then((url) => {
           setFileCount((prevCount) => prevCount + 1);
         });
@@ -142,9 +152,11 @@ function App() {
         title: "Your Image has been Uploaded!",
         showConfirmButton: true,
       });
+
       setFile(null);
       setUploading(false);
     } catch (err) {
+      // Any error throw an error saying the image failed to upload
       Swal.fire({
         icon: "error",
         title: "Failed to upload image!",
@@ -153,6 +165,7 @@ function App() {
     }
   }
 
+  //Set the file to the selected file change
   function handleFileChange(event) {
     setFile(event.target.files[0]);
   }
