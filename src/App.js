@@ -1,12 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
 import Lottie from "lottie-react";
-import {
-  storage,
-  authentication,
-  signInAnonymously,
-  appCheck,
-} from "./firebase";
+import { storage, authentication, signInAnonymously } from "./firebase";
 import { ref, uploadBytes, listAll, getDownloadURL } from "firebase/storage";
 import heic2any from "heic2any";
 import { nanoid } from "nanoid";
@@ -70,6 +65,9 @@ function App() {
     setUploading(true);
 
     //If not authenticated sign in again
+    if (authentication.currentUser) {
+      console.log("Authenticated");
+    }
     if (!authentication.currentUser) {
       await signInAnonymouslyHandler();
     }
@@ -90,6 +88,8 @@ function App() {
 
     //Get the extension of the file
     let fileExtension = file.name.split(".").pop().toLowerCase();
+    console.log("File: " + file.name);
+    console.log("File Extension: " + fileExtension);
 
     //If extension is not one of the below file types then it is not an image
     // so throw an error
@@ -119,7 +119,7 @@ function App() {
     }
 
     let fileToProcess;
-
+    let altered = false;
     try {
       if (fileExtension === "heic") {
         // It's the converting from HEIC file which takes a while
@@ -131,12 +131,15 @@ function App() {
         fileExtension = "png";
 
         fileToProcess = await resizeFile(fileToProcess);
+
+        altered = true;
       }
 
       const randomString = nanoid(8);
+
       const imageReference = ref(
         storage,
-        "images/image" + fileCount + randomString + "." + fileToProcess
+        "images/image" + fileCount + randomString + "." + fileExtension
       ); // Create the reference, include the number or name
 
       //Uploading the image and setting the file count to add one
@@ -157,11 +160,16 @@ function App() {
       setUploading(false);
     } catch (err) {
       // Any error throw an error saying the image failed to upload
+      console.error("Error during upload process:", err);
       Swal.fire({
         icon: "error",
         title: "Failed to upload image!",
+        text: err.message || "An unknown error occurred",
         showConfirmButton: true,
       });
+
+      setFile(null);
+      setUploading(false);
     }
   }
 
