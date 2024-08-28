@@ -15,7 +15,7 @@ function App() {
   const [fileCount, setFileCount] = useState(0); // Stores the number of Images
   const [uploading, setUploading] = useState(false);
 
-  const imagesListRef = ref(storage, "images/"); // The file on firebase starts in the images folder
+  const imagesListRef = ref(storage, "images/"); //The file on firebase starts in the images folder
 
   //Signs the user annonymously into the firebase
   const signInAnonymouslyHandler = async () => {
@@ -118,25 +118,23 @@ function App() {
       return;
     }
 
-    let fileToProcess;
-    let altered = false;
+    let fileToProcess = file;
+    let resizedFile = file;
+
     try {
       if (fileExtension === "heic") {
         // It's the converting from HEIC file which takes a while
         const heicFile = await heic2any({
-          blob: file,
+          blob: fileToProcess,
           toType: "image/png",
         });
         fileToProcess = heicFile;
         fileExtension = "png";
 
-        fileToProcess = await resizeFile(fileToProcess);
-
-        altered = true;
+        resizedFile = await resizeFile(fileToProcess);
       }
 
       const randomString = nanoid(8);
-
       const imageReference = ref(
         storage,
         "images/image" + fileCount + randomString + "." + fileExtension
