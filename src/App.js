@@ -14,6 +14,7 @@ function App() {
   const [file, setFile] = useState(null); // Stores the image files
   const [fileCount, setFileCount] = useState(0); // Stores the number of Images
   const [uploading, setUploading] = useState(false);
+  const [token, setToken] = useState("");
 
   const imagesListRef = ref(storage, "images/"); //The file on firebase starts in the images folder
 
@@ -32,6 +33,9 @@ function App() {
   };
 
   useEffect(() => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const token = queryParams.get("token");
+    setToken(token);
     // sign in the user first to the user
     const authenticateAndFetchImages = async () => {
       if (!authentication.currentUser) {
@@ -88,8 +92,6 @@ function App() {
 
     //Get the extension of the file
     let fileExtension = file.name.split(".").pop().toLowerCase();
-    console.log("File: " + file.name);
-    console.log("File Extension: " + fileExtension);
 
     //If extension is not one of the below file types then it is not an image
     // so throw an error
@@ -118,6 +120,13 @@ function App() {
       return;
     }
 
+    //Lets retrieve the code here
+    console.log(token);
+
+    const fileRef = ref(storage, "code/dailycode");
+    getDownloadURL(fileRef).then((url) => {
+      console.log(url);
+    });
     let fileToProcess = file;
     let resizedFile = file;
 
