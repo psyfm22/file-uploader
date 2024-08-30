@@ -134,11 +134,22 @@ function App() {
           const byteArray = new Uint8Array(buffer); // Convert the buffer to a byte array
           console.log(byteArray);
           firebaseToken = String.fromCharCode(...byteArray);
+
+          if (token !== firebaseToken) {
+            Swal.fire({
+              icon: "error",
+              title: "Failed to upload image!",
+              text: "Please use the correct link shown on CheerBot!",
+              showConfirmButton: true,
+            });
+            return;
+          }
         })
         .catch((error) => {
           console.error("Error fetching byte array:", error);
         });
     });
+
     let fileToProcess = file;
     let resizedFile = file;
 
@@ -174,13 +185,6 @@ function App() {
             token +
             " and firebase Token " +
             firebaseToken,
-          showConfirmButton: true,
-        });
-      } else {
-        Swal.fire({
-          icon: "error",
-          title: "Failed to upload image!",
-          text: "Please use the correct link shown on CheerBot!",
           showConfirmButton: true,
         });
       }
