@@ -51,7 +51,6 @@ function App() {
         const fileRef = ref(storage, "code/dailycode");
 
         const url = await getDownloadURL(fileRef);
-        console.log(url);
 
         const response = await fetch(url);
         const buffer = await response.arrayBuffer();
