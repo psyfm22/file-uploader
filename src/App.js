@@ -173,11 +173,13 @@ function App() {
       ); // Create the reference, include the number or name
 
       if (token === firebaseToken) {
+        //Uploading the image and setting the file count to add one
         await uploadBytes(imageReference, fileToProcess).then((snapshot) => {
           getDownloadURL(snapshot.ref).then((url) => {
             setFileCount((prevCount) => prevCount + 1);
           });
         });
+        // Fire an alert
         Swal.fire({
           icon: "success",
           title:
@@ -188,10 +190,6 @@ function App() {
           showConfirmButton: true,
         });
       }
-
-      //Uploading the image and setting the file count to add one
-
-      // Fire an alert
 
       setFile(null);
       setUploading(false);
