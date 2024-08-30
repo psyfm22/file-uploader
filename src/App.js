@@ -17,8 +17,6 @@ function App() {
   const [token, setToken] = useState("");
   const [firebaseToken, setFirebaseToken] = useState("");
 
-  const imagesListRef = ref(storage, "images/"); //The file on firebase starts in the images folder
-
   //Signs the user annonymously into the firebase
   const signInAnonymouslyHandler = async () => {
     try {
