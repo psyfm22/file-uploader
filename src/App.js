@@ -41,7 +41,6 @@ function App() {
         const queryParams = new URLSearchParams(window.location.search);
         const token = queryParams.get("token");
         setToken(token);
-        setToken("E1Hsvc3k");
 
         // sign in the user first to the user
         if (!authentication.currentUser) {
