@@ -138,10 +138,12 @@ function App() {
           if (token !== firebaseToken) {
             Swal.fire({
               icon: "error",
-              title: "Failed to upload image!",
-              text: "Please use the correct link shown on CheerBot!",
+              title: "Failed to Upload image!",
+              text: "Please use the Link shown on CheerBot!",
               showConfirmButton: true,
             });
+            setFile(null);
+            setUploading(false);
             return;
           }
         })
@@ -182,11 +184,7 @@ function App() {
         // Fire an alert
         Swal.fire({
           icon: "success",
-          title:
-            "Your Image has been Uploaded! here is token from header " +
-            token +
-            " and firebase Token " +
-            firebaseToken,
+          title: "Your Image has been Uploaded!",
           showConfirmButton: true,
         });
       }
