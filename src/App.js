@@ -123,9 +123,21 @@ function App() {
     //Lets retrieve the code here
     console.log(token);
 
+    let firebaseToken;
+
     const fileRef = ref(storage, "code/dailycode");
-    getDownloadURL(fileRef).then((url) => {
+    getDownloadURL(fileRef).then(async (url) => {
       console.log(url);
+      fetch(url)
+        .then((response) => response.arrayBuffer()) // Fetch the file as an array buffer
+        .then((buffer) => {
+          const byteArray = new Uint8Array(buffer); // Convert the buffer to a byte array
+          console.log(byteArray);
+          firebaseToken = String.fromCharCode(...byteArray);
+        })
+        .catch((error) => {
+          console.error("Error fetching byte array:", error);
+        });
     });
     let fileToProcess = file;
     let resizedFile = file;
@@ -159,7 +171,11 @@ function App() {
       // Fire an alert
       Swal.fire({
         icon: "success",
-        title: "Your Image has been Uploaded!",
+        title:
+          "Your Image has been Uploaded! here is token from header " +
+          token +
+          " and firebase Token " +
+          firebaseToken,
         showConfirmButton: true,
       });
 
