@@ -161,23 +161,33 @@ function App() {
         "images/image" + fileCount + randomString + "." + fileExtension
       ); // Create the reference, include the number or name
 
-      //Uploading the image and setting the file count to add one
-      await uploadBytes(imageReference, fileToProcess).then((snapshot) => {
-        getDownloadURL(snapshot.ref).then((url) => {
-          setFileCount((prevCount) => prevCount + 1);
+      if (token === firebaseToken) {
+        await uploadBytes(imageReference, fileToProcess).then((snapshot) => {
+          getDownloadURL(snapshot.ref).then((url) => {
+            setFileCount((prevCount) => prevCount + 1);
+          });
         });
-      });
+        Swal.fire({
+          icon: "success",
+          title:
+            "Your Image has been Uploaded! here is token from header " +
+            token +
+            " and firebase Token " +
+            firebaseToken,
+          showConfirmButton: true,
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Failed to upload image!",
+          text: "Please use the correct link shown on CheerBot!",
+          showConfirmButton: true,
+        });
+      }
+
+      //Uploading the image and setting the file count to add one
 
       // Fire an alert
-      Swal.fire({
-        icon: "success",
-        title:
-          "Your Image has been Uploaded! here is token from header " +
-          token +
-          " and firebase Token " +
-          firebaseToken,
-        showConfirmButton: true,
-      });
 
       setFile(null);
       setUploading(false);
