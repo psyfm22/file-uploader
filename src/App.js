@@ -15,6 +15,7 @@ function App() {
   const [fileCount, setFileCount] = useState(0); // Stores the number of Images
   const [uploading, setUploading] = useState(false);
   const [token, setToken] = useState("");
+  const [firebaseToken, setFirebaseToken] = useState("");
 
   const imagesListRef = ref(storage, "images/"); //The file on firebase starts in the images folder
 
@@ -32,18 +33,36 @@ function App() {
     }
   };
 
+  //Character limit lets set it to 27, but if over this then, 28 we show first 24 characters and three dots
+
   useEffect(() => {
-    const queryParams = new URLSearchParams(window.location.search);
-    const token = queryParams.get("token");
-    setToken(token);
-    // sign in the user first to the user
-    const authenticateAndFetchImages = async () => {
-      if (!authentication.currentUser) {
-        await signInAnonymouslyHandler();
+    const authenticateUser = async () => {
+      try {
+        const queryParams = new URLSearchParams(window.location.search);
+        const token = queryParams.get("token");
+        setToken(token);
+        setToken("E1Hsvc3k");
+
+        // sign in the user first to the user
+        if (!authentication.currentUser) {
+          await signInAnonymouslyHandler();
+        }
+
+        const fileRef = ref(storage, "code/dailycode");
+
+        const url = await getDownloadURL(fileRef);
+        console.log(url);
+
+        const response = await fetch(url);
+        const buffer = await response.arrayBuffer();
+        const byteArray = new Uint8Array(buffer);
+        setFirebaseToken(String.fromCharCode(...byteArray));
+      } catch (error) {
+        console.error("Error during fetch or authentication:", error);
       }
     };
-    authenticateAndFetchImages();
-  }, [authentication.currentUser, imagesListRef]);
+    authenticateUser();
+  }, []);
 
   //resize the image using Resizer to these set proportions
   const resizeFile = (file) => {
@@ -87,9 +106,6 @@ function App() {
       return;
     }
 
-    // const token = await getToken(appCheck);
-    // console.log(token);
-
     //Get the extension of the file
     let fileExtension = file.name.split(".").pop().toLowerCase();
 
@@ -119,38 +135,6 @@ function App() {
       setUploading(false);
       return;
     }
-
-    //Lets retrieve the code here
-    console.log(token);
-
-    let firebaseToken;
-
-    const fileRef = ref(storage, "code/dailycode");
-    getDownloadURL(fileRef).then(async (url) => {
-      console.log(url);
-      fetch(url)
-        .then((response) => response.arrayBuffer()) // Fetch the file as an array buffer
-        .then((buffer) => {
-          const byteArray = new Uint8Array(buffer); // Convert the buffer to a byte array
-          console.log(byteArray);
-          firebaseToken = String.fromCharCode(...byteArray);
-
-          if (token !== firebaseToken) {
-            Swal.fire({
-              icon: "error",
-              title: "Failed to Upload image!",
-              text: "Please use the Link shown on CheerBot!",
-              showConfirmButton: true,
-            });
-            setFile(null);
-            setUploading(false);
-            return;
-          }
-        })
-        .catch((error) => {
-          console.error("Error fetching byte array:", error);
-        });
-    });
 
     let fileToProcess = file;
     let resizedFile = file;
@@ -187,13 +171,21 @@ function App() {
           title: "Your Image has been Uploaded!",
           showConfirmButton: true,
         });
-      }
+        setFile(null);
+        setUploading(false);
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Failed to Upload Image",
+          text: "Please use the link on the CheerBot!",
+          showConfirmButton: true,
+        });
 
-      setFile(null);
-      setUploading(false);
+        setFile(null);
+        setUploading(false);
+      }
     } catch (err) {
       // Any error throw an error saying the image failed to upload
-      console.error("Error during upload process:", err);
       Swal.fire({
         icon: "error",
         title: "Failed to upload image!",
@@ -219,7 +211,11 @@ function App() {
           <input type="file" onChange={handleFileChange} />
           Choose File{" "}
         </label>
-        {file ? `Selected File: ${file.name}` : "No File Selected"}
+        {file
+          ? file.name.length > 27
+            ? "Selected File: " + file.name.slice(0, 24) + "..."
+            : `Selected File: ${file.name}`
+          : "No File Selected"}
         <br />
         <br />
         <button onClick={handleUpload} disabled={uploading}>
