@@ -1,6 +1,6 @@
 [
   {
-    "origin": ["http://localhost:3000"],
+    "origin": ["http://cheerbot.cobotmakerspace.org"],
     "method": ["GET"],
     "maxAgeSeconds": 3600
   }
