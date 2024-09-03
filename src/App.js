@@ -7,6 +7,7 @@ import heic2any from "heic2any";
 import { nanoid } from "nanoid";
 import Swal from "sweetalert2";
 import Resizer from "react-image-file-resizer";
+import imageCompression from "browser-image-compression";
 import uploadingAnimation from "./animation/uploadingAnimation.json";
 
 function App() {
@@ -17,28 +18,15 @@ function App() {
   const [token, setToken] = useState("");
   const [firebaseToken, setFirebaseToken] = useState("");
 
-  //Signs the user annonymously into the firebase
-  const signInAnonymouslyHandler = async () => {
-    try {
-      await signInAnonymously(authentication);
-    } catch (error) {
-      console.error("Error signing in anonymously:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Failed to authenticate!",
-        showConfirmButton: true,
-      });
-    }
-  };
-
   //Character limit lets set it to 27, but if over this then, 28 we show first 24 characters and three dots
 
   useEffect(() => {
-    const authenticateUser = async () => {
+    async function authenticateUser() {
       try {
         const queryParams = new URLSearchParams(window.location.search);
         const token = queryParams.get("token");
         setToken(token);
+        setToken("Vcle7YKo");
 
         // sign in the user first to the user
         if (!authentication.currentUser) {
@@ -56,27 +44,64 @@ function App() {
       } catch (error) {
         console.error("Error during fetch or authentication:", error);
       }
-    };
+    }
     authenticateUser();
   }, []);
 
+  //Signs the user annonymously into the firebase
+  async function signInAnonymouslyHandler() {
+    try {
+      await signInAnonymously(authentication);
+    } catch (error) {
+      console.error("Error signing in anonymously:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Failed to authenticate!",
+        showConfirmButton: true,
+      });
+    }
+  }
+
+  //Set the file to the selected file change
+  function handleFileChange(event) {
+    setFile(event.target.files[0]);
+  }
+
+  async function compressImage(file) {
+    const options = {
+      maxSizeMB: 0.1, // desired max size in MB
+      useWebWorker: true,
+    };
+
+    try {
+      console.log("compfile1");
+      const compressedFile = await imageCompression(file, options);
+      console.log("compfile2");
+      return compressedFile;
+    } catch (error) {
+      console.error("Error during image compression:", error);
+      return "error";
+    }
+  }
+
   //resize the image using Resizer to these set proportions
-  const resizeFile = (file) => {
-    return new Promise((resolve) => {
-      Resizer.imageFileResizer(
-        file,
-        504,
-        504,
-        "PNG",
-        60,
-        0,
-        (uri) => {
-          resolve(uri);
-        },
-        "blob"
-      );
-    });
-  };
+
+  // function resizeFile(file, reduceFactor) {
+  //   return new Promise((resolve) => {
+  //     Resizer.imageFileResizer(
+  //       file,
+  //       504,
+  //       504,
+  //       "PNG",
+  //       100 / reduceFactor,
+  //       0,
+  //       (uri) => {
+  //         resolve(uri);
+  //       },
+  //       "blob"
+  //     );
+  //   });
+  // }
 
   //Handle the upload of the image to the firebase
   async function handleUpload() {
@@ -144,8 +169,23 @@ function App() {
         });
         fileToProcess = heicFile;
         fileExtension = "png";
+      }
 
-        resizedFile = await resizeFile(fileToProcess);
+      //Need to compress the image if true
+      if (resizedFile.size > 100 * 1024) {
+        console.log("Above 100KB");
+        console.log("This is the file size " + resizedFile.size);
+
+        resizedFile = await compressImage(resizedFile);
+        console.log(resizedFile.size);
+        if (resizedFile === "error") {
+          Swal.fire({
+            icon: "error",
+            title: "Failed to Upload Image",
+            text: "Please use the link on the CheerBot!",
+            showConfirmButton: true,
+          });
+        }
       }
 
       const randomString = nanoid(8);
@@ -154,9 +194,11 @@ function App() {
         "images/image" + fileCount + randomString + "." + fileExtension
       ); // Create the reference, include the number or name
 
+      setFirebaseToken("Vcle7YKo");
+
       if (token === firebaseToken) {
         //Uploading the image and setting the file count to add one
-        await uploadBytes(imageReference, fileToProcess).then((snapshot) => {
+        await uploadBytes(imageReference, resizedFile).then((snapshot) => {
           getDownloadURL(snapshot.ref).then((url) => {
             setFileCount((prevCount) => prevCount + 1);
           });
@@ -192,11 +234,6 @@ function App() {
       setFile(null);
       setUploading(false);
     }
-  }
-
-  //Set the file to the selected file change
-  function handleFileChange(event) {
-    setFile(event.target.files[0]);
   }
 
   return (
