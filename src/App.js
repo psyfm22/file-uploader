@@ -6,7 +6,6 @@ import { ref, uploadBytes, listAll, getDownloadURL } from "firebase/storage";
 import heic2any from "heic2any";
 import { nanoid } from "nanoid";
 import Swal from "sweetalert2";
-import Resizer from "react-image-file-resizer";
 import imageCompression from "browser-image-compression";
 import uploadingAnimation from "./animation/uploadingAnimation.json";
 
@@ -18,15 +17,12 @@ function App() {
   const [token, setToken] = useState("");
   const [firebaseToken, setFirebaseToken] = useState("");
 
-  //Character limit lets set it to 27, but if over this then, 28 we show first 24 characters and three dots
-
   useEffect(() => {
     async function authenticateUser() {
       try {
         const queryParams = new URLSearchParams(window.location.search);
         const token = queryParams.get("token");
         setToken(token);
-        setToken("Vcle7YKo");
 
         // sign in the user first to the user
         if (!authentication.currentUser) {
@@ -69,39 +65,19 @@ function App() {
 
   async function compressImage(file) {
     const options = {
-      maxSizeMB: 0.1, // desired max size in MB
-      useWebWorker: true,
+      maxSizeMB: 0.2, // desired max size in MB
+      maxWidthOrHeight: 1008,
+      useWebWorker: false,
     };
 
     try {
-      console.log("compfile1");
       const compressedFile = await imageCompression(file, options);
-      console.log("compfile2");
       return compressedFile;
     } catch (error) {
       console.error("Error during image compression:", error);
       return "error";
     }
   }
-
-  //resize the image using Resizer to these set proportions
-
-  // function resizeFile(file, reduceFactor) {
-  //   return new Promise((resolve) => {
-  //     Resizer.imageFileResizer(
-  //       file,
-  //       504,
-  //       504,
-  //       "PNG",
-  //       100 / reduceFactor,
-  //       0,
-  //       (uri) => {
-  //         resolve(uri);
-  //       },
-  //       "blob"
-  //     );
-  //   });
-  // }
 
   //Handle the upload of the image to the firebase
   async function handleUpload() {
@@ -172,12 +148,8 @@ function App() {
       }
 
       //Need to compress the image if true
-      if (resizedFile.size > 100 * 1024) {
-        console.log("Above 100KB");
-        console.log("This is the file size " + resizedFile.size);
-
+      if (resizedFile.size > 200 * 1024) {
         resizedFile = await compressImage(resizedFile);
-        console.log(resizedFile.size);
         if (resizedFile === "error") {
           Swal.fire({
             icon: "error",
@@ -193,8 +165,6 @@ function App() {
         storage,
         "images/image" + fileCount + randomString + "." + fileExtension
       ); // Create the reference, include the number or name
-
-      setFirebaseToken("Vcle7YKo");
 
       if (token === firebaseToken) {
         //Uploading the image and setting the file count to add one
