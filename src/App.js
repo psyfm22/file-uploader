@@ -196,8 +196,8 @@ function App() {
       // Any error throw an error saying the image failed to upload
       Swal.fire({
         icon: "error",
-        title: "Failed to upload image!",
-        text: err.message || "An unknown error occurred",
+        title: "Failed to Upload Image!",
+        text: err.message || "An Unknown Error Occurred",
         showConfirmButton: true,
       });
 
