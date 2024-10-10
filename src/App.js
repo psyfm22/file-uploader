@@ -215,8 +215,8 @@ function App() {
           Choose File{" "}
         </label>
         {file
-          ? file.name.length > 27
-            ? "Selected File: " + file.name.slice(0, 24) + "..."
+          ? file.name.length > 19
+            ? "Selected File: " + file.name.slice(0, 16) + "..."
             : `Selected File: ${file.name}`
           : "No File Selected"}
         <br />
