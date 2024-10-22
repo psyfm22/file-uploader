@@ -154,7 +154,7 @@ function App() {
           Swal.fire({
             icon: "error",
             title: "Failed to Upload Image",
-            text: "Please use the link on the CheerBot!",
+            text: "Error Resizing the File",
             showConfirmButton: true,
           });
         }
