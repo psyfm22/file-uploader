@@ -166,7 +166,7 @@ function App() {
         "images/image" + fileCount + randomString + "." + fileExtension
       ); // Create the reference, include the number or name
 
-      if (token === firebaseToken) {
+      // if (token === firebaseToken) {
         //Uploading the image and setting the file count to add one
         await uploadBytes(imageReference, resizedFile).then((snapshot) => {
           getDownloadURL(snapshot.ref).then((url) => {
@@ -181,17 +181,17 @@ function App() {
         });
         setFile(null);
         setUploading(false);
-      } else {
-        Swal.fire({
-          icon: "error",
-          title: "Failed to Upload Image",
-          text: "Please use the link on the CheerBot!",
-          showConfirmButton: true,
-        });
+      // } else {
+      //   Swal.fire({
+      //     icon: "error",
+      //     title: "Failed to Upload Image",
+      //     text: "Please use the link on the CheerBot!",
+      //     showConfirmButton: true,
+      //   });
 
-        setFile(null);
-        setUploading(false);
-      }
+      //   setFile(null);
+      //   setUploading(false);
+      // }
     } catch (err) {
       // Any error throw an error saying the image failed to upload
       Swal.fire({
